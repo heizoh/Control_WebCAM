@@ -34,7 +34,7 @@ namespace Control_WebCAM
             CV.FrameHeight = HEIGHT;
             CV.FrameWidth = WIDTH;
 
-            Fr = new Mat(HEIGHT, WIDTH, MatType.CV_8SC3);
+            Fr = new Mat(HEIGHT, WIDTH, MatType.CV_8UC3);
 
             bmp = new Bitmap(Fr.Cols, Fr.Rows, (int)Fr.Step(), System.Drawing.Imaging.PixelFormat.Format24bppRgb, Fr.Data);
 
@@ -44,7 +44,38 @@ namespace Control_WebCAM
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+        }
+
+        
+
+        private bool waitCancel()
+        {
+            CV.Grab();
+
+            Invoke((MethodInvoker)delegate
+            {
+                NativeMethods.videoio_VideoCapture_operatorRightShift_Mat(CV.CvPtr, Fr.CvPtr);
+                
+                Gr.DrawImage(bmp, 0, 0, Fr.Cols, Fr.Rows);
+                pictureBox1.Refresh();
+            });
+            return true;
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            bool Frg = true;
+            while (Frg)
+            {
+                Task.Run(() =>
+                {
+
+                    Frg = waitCancel();
+                    System.Threading.Thread.Sleep(100);
+
+                });
+            }
+
         }
     }
 }
