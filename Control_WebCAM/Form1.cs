@@ -14,20 +14,29 @@ namespace Control_WebCAM
 {
     public partial class Form1 : Form
     {
-        VideoCapture CV;
-        Bitmap bmp;
-        Mat Fr;
-        Graphics Gr;
-        Rectangle rect;
+        private VideoCapture CV;
+        private Bitmap bmp;
+        private Mat Fr;
+        private bool CFrg = true;
+        private readonly int HEIGHT = 720;
+        private readonly int WIDTH = 1280;
+        private StringBuilder sb = new StringBuilder();
+        private string path = "";
+        private string ext = "";
+        private SettingPanel st;
 
-        int HEIGHT = 480;
-        int WIDTH = 720;
         public Form1()
         {
             InitializeComponent();
+            st = new SettingPanel();
+            st.fm = this;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
             CV = new VideoCapture(0);
-            if(!CV.IsOpened())
+            if (!CV.IsOpened())
             {
                 MessageBox.Show("カメラが開けません。");
                 this.Close();
@@ -40,63 +49,111 @@ namespace Control_WebCAM
 
             bmp = new Bitmap(Fr.Cols, Fr.Rows, (int)Fr.Step(), System.Drawing.Imaging.PixelFormat.Format24bppRgb, Fr.Data);
             pictureBox1.Image = bmp;
-            rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            Gr = pictureBox1.CreateGraphics();
-            
+            textBox1.Text = "";
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-        }
 
-        
 
-        private bool WaitCancel()
+        private bool WaitCancel(bool frg)
         {
 
             Invoke((MethodInvoker)delegate
                 {
-                    
-                    //if(pictureBox1.Image != null)
-                    //{
-                    //    pictureBox1.Image.Dispose();
-                    //}
-
-                    pictureBox1.Image = BitmapConverter.ToBitmap(Fr);
-
-                    //System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-                    //NativeMethods.videoio_VideoCapture_operatorRightShift_Mat(CV.CvPtr, bmpData.Scan0);
-                    //bmp.UnlockBits(bmpData);
-                    //Gr.DrawImage(bmp, 0, 0, Fr.Cols, Fr.Rows);
-                    pictureBox1.Refresh();
+                    if (frg)
+                    {
+                        pictureBox1.Image = BitmapConverter.ToBitmap(Fr);
+                        pictureBox1.Refresh();
+                    }
                 });
-            return true;
+            if (frg)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            bool Frg = true;
-            Task.Run(() =>
+            bool Frg;
+
+            if (button1.Text == "起動")
             {
-                while (Frg)
+                CFrg = true;
+                Frg = true;
+                textBox1.AppendText("カメラを起動しました。\r\n");
+                Task.Run(() =>
                 {
+                    while (Frg)
+                    {
+                        CV.Read(Fr);
 
-                    CV.Read(Fr);
+                        Frg = WaitCancel(CFrg);
+                        System.Threading.Thread.Sleep(50);
+                    }
+                });
+                button1.Text = "停止";
 
-                    Frg = WaitCancel();
-                    System.Threading.Thread.Sleep(50);
-                }
-            });
-
+            }
+            else
+            {
+                CFrg = false;
+                textBox1.AppendText("カメラを停止しました。\r\n");
+                GC.Collect();
+                button1.Text = "起動";
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(CV!=null)
-            {
-                CV.Dispose();
-            }
+
+            if (CV != null) CV.Dispose();
+            if (bmp != null) bmp.Dispose();
+            if (Fr != null) Fr.Dispose();
+
+        }
+
+        private void Button3_Click(object sender, EventArgs e)
+        {
+            //静止画像を保存します。
             
         }
+
+        private void Button4_Click(object sender, EventArgs e)
+        {
+            //動画を保存します。
+            
+        }
+
+        private void Button2_Click(object sender, EventArgs e)
+        {
+        }
+
+        public string Path
+        {
+            set
+            {
+                path = value;
+            }
+            get
+            {
+                return path;
+            }
+        }
+
+        public string Pict_Format
+        {
+            set
+            {
+                ext = value;
+            }
+            get
+            {
+                return ext;
+            }
+        }
+
     }
 }
