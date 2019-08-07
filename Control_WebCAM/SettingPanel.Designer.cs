@@ -48,6 +48,8 @@
             // 
             // textBox1
             // 
+            this.textBox1.BackColor = System.Drawing.Color.White;
+            this.textBox1.Enabled = false;
             this.textBox1.Location = new System.Drawing.Point(12, 30);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(542, 25);
@@ -55,13 +57,13 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(560, 30);
+            this.button1.Location = new System.Drawing.Point(560, 25);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 25);
+            this.button1.Size = new System.Drawing.Size(75, 35);
             this.button1.TabIndex = 2;
             this.button1.Text = "参照";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.Button1_Click);
+            this.button1.Click += new System.EventHandler(this.FolderSelection_Click);
             // 
             // label2
             // 
@@ -86,28 +88,29 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(468, 135);
+            this.button2.Location = new System.Drawing.Point(479, 130);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 25);
+            this.button2.Size = new System.Drawing.Size(75, 35);
             this.button2.TabIndex = 4;
             this.button2.Text = "OK";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.Button2_Click);
+            this.button2.Click += new System.EventHandler(this.OK_Click);
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(560, 135);
+            this.button3.Location = new System.Drawing.Point(560, 130);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 25);
+            this.button3.Size = new System.Drawing.Size(75, 35);
             this.button3.TabIndex = 4;
             this.button3.Text = "Cancel";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.Cancel_Click);
             // 
             // SettingPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(653, 170);
+            this.ClientSize = new System.Drawing.Size(653, 177);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.comboBox1);
@@ -117,6 +120,7 @@
             this.Controls.Add(this.label1);
             this.Name = "SettingPanel";
             this.Text = "設定";
+            this.Load += new System.EventHandler(this.SettingPanel_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

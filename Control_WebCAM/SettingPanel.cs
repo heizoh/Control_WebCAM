@@ -21,7 +21,7 @@ namespace Control_WebCAM
             InitializeComponent();
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void FolderSelection_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog Diag=new FolderBrowserDialog())
             {
@@ -33,9 +33,9 @@ namespace Control_WebCAM
             }
         }
 
-        private void Button2_Click(object sender, EventArgs e)
+        private void OK_Click(object sender, EventArgs e)
         {
-            if(textBox1.Text!=null || comboBox1.SelectedIndex==0)
+            if (textBox1.Text == "" || comboBox1.SelectedIndex == -1) 
             {
                 MessageBox.Show("設定されていない項目があります。");
             }
@@ -43,7 +43,26 @@ namespace Control_WebCAM
             {
                 fm.Path = textBox1.Text;
                 fm.Pict_Format = comboBox1.Text;
+                this.Close();
             }
+        }
+
+        private void SettingPanel_Load(object sender, EventArgs e)
+        {
+            if(fm.Path != "")
+            {
+                textBox1.Text = fm.Path;
+            }
+
+            if(fm.Pict_Format!= "")
+            {
+                comboBox1.Text = fm.Pict_Format;
+            }
+        }
+
+        private void Cancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

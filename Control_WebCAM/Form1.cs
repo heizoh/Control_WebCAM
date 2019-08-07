@@ -118,6 +118,10 @@ namespace Control_WebCAM
         private void Button3_Click(object sender, EventArgs e)
         {
             //静止画像を保存します。
+            if (Path != "" && Pict_Format != "")
+            {
+                pictureBox1.Image.Save($"{Path}\\{DateTime.Now:yyyyMMddHHmmss}.{Pict_Format}");
+            }
             
         }
 
@@ -129,6 +133,8 @@ namespace Control_WebCAM
 
         private void Button2_Click(object sender, EventArgs e)
         {
+            
+            st.Show();
         }
 
         public string Path
