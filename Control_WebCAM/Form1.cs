@@ -15,14 +15,16 @@ namespace Control_WebCAM
     public partial class Form1 : Form
     {
         private VideoCapture CV;
+        private VideoWriter VW;
         private Bitmap bmp;
         private Mat Fr;
         private bool CFrg = true;
+        private bool RecFrg = false;                    //録画状態
         private readonly int HEIGHT = 720;
         private readonly int WIDTH = 1280;
         private StringBuilder sb = new StringBuilder();
-        private string path = "";
-        private string ext = "";
+        private string path = "G:\\Pict";
+        private string ext = "jpg";
         private SettingPanel st;
 
         public Form1()
@@ -62,6 +64,10 @@ namespace Control_WebCAM
                     if (frg)
                     {
                         pictureBox1.Image = BitmapConverter.ToBitmap(Fr);
+                        if(RecFrg)
+                        {
+                            VW.Write(Fr);
+                        }
                         pictureBox1.Refresh();
                     }
                 });
@@ -79,11 +85,17 @@ namespace Control_WebCAM
         {
             bool Frg;
 
-            if (button1.Text == "起動")
+            if (button_Start.Text == "起動")
             {
                 CFrg = true;
                 Frg = true;
                 textBox1.AppendText("カメラを起動しました。\r\n");
+
+                //ボタンの動作を変更
+                button_Rec.Enabled = true;
+                button_Shot.Enabled = true;
+                button_Config.Enabled = false;
+
                 Task.Run(() =>
                 {
                     while (Frg)
@@ -91,10 +103,10 @@ namespace Control_WebCAM
                         CV.Read(Fr);
 
                         Frg = WaitCancel(CFrg);
-                        System.Threading.Thread.Sleep(50);
+                        System.Threading.Thread.Sleep(20);
                     }
                 });
-                button1.Text = "停止";
+                button_Start.Text = "停止";
 
             }
             else
@@ -102,7 +114,13 @@ namespace Control_WebCAM
                 CFrg = false;
                 textBox1.AppendText("カメラを停止しました。\r\n");
                 GC.Collect();
-                button1.Text = "起動";
+
+                //ボタンの動作を変更
+                button_Rec.Enabled = false;
+                button_Shot.Enabled = false;
+                button_Config.Enabled = true;
+
+                button_Start.Text = "起動";
             }
         }
 
@@ -127,8 +145,25 @@ namespace Control_WebCAM
 
         private void Button4_Click(object sender, EventArgs e)
         {
-            //動画を保存します。
-            
+            if (button_Rec.Text == "録画")
+            {
+                //動画を保存します。
+                VW = new VideoWriter($"{Path}\\{DateTime.Now:yyyyMMddHHmmss}.avi", FourCC.H264, 30, new OpenCvSharp.Size(0.5 * Height, 0.5 * Width));
+                RecFrg = true;
+                button_Shot.Enabled = false;
+                button_Start.Enabled = false;
+                button_Rec.Text = "停止";
+                textBox1.AppendText("録画を開始しました。\r\n");
+            }
+            else
+            {
+                RecFrg = false;
+                VW.Release();
+                button_Shot.Enabled = true;
+                button_Start.Enabled = true;
+                button_Rec.Text = "録画";
+                textBox1.AppendText("録画を停止しました。\r\n");
+            }
         }
 
         private void Button2_Click(object sender, EventArgs e)
