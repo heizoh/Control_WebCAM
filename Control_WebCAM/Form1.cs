@@ -16,16 +16,17 @@ namespace Control_WebCAM
     {
         private VideoCapture CV;
         private VideoWriter VW;
-        private Bitmap bmp;
         private Mat Fr;
         private bool CFrg = true;
         private bool RecFrg = false;                    //録画状態
         private readonly int HEIGHT = 720;
         private readonly int WIDTH = 1280;
-        private StringBuilder sb = new StringBuilder();
         private string path = "G:\\Pict";
         private string ext = "jpg";
         private SettingPanel st;
+        private double FPS;
+        private OpenCvSharp.Size SZ;
+        private FourCC FCC = FourCC.XVID;
 
         public Form1()
         {
@@ -49,24 +50,30 @@ namespace Control_WebCAM
 
             Fr = new Mat(HEIGHT, WIDTH, MatType.CV_8UC3);
 
-            bmp = new Bitmap(Fr.Cols, Fr.Rows, (int)Fr.Step(), System.Drawing.Imaging.PixelFormat.Format24bppRgb, Fr.Data);
-            pictureBox1.Image = bmp;
+            //FPS = CV.Fps;
+            FPS = 29.97;
+            SZ.Width = CV.FrameWidth;
+            SZ.Height = CV.FrameHeight;
+
             textBox1.Text = "";
         }
-
-
 
         private bool WaitCancel(bool frg)
         {
 
             Invoke((MethodInvoker)delegate
                 {
+                    Mat VF = Fr.Clone();
                     if (frg)
                     {
                         pictureBox1.Image = BitmapConverter.ToBitmap(Fr);
                         if(RecFrg)
                         {
-                            VW.Write(Fr);
+                            VW.Write(VF);
+                        }
+                        else if(VW != null && VW.IsOpened())
+                        {
+                            VW.Release();
                         }
                         pictureBox1.Refresh();
                     }
@@ -126,9 +133,8 @@ namespace Control_WebCAM
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            CFrg = false;
             if (CV != null) CV.Dispose();
-            if (bmp != null) bmp.Dispose();
             if (Fr != null) Fr.Dispose();
 
         }
@@ -148,8 +154,12 @@ namespace Control_WebCAM
             if (button_Rec.Text == "録画")
             {
                 //動画を保存します。
-                VW = new VideoWriter($"{Path}\\{DateTime.Now:yyyyMMddHHmmss}.avi", FourCC.H264, 30, new OpenCvSharp.Size(0.5 * Height, 0.5 * Width));
+                
+                VW = new VideoWriter(fileName: $"{Path}\\{DateTime.Now:yyyyMMddHHmmss}.avi", fourcc: FCC, fps: FPS, frameSize: SZ, isColor: true);
                 RecFrg = true;
+
+                System.Diagnostics.Debug.WriteLine($"Size:{SZ.Width}×{SZ.Height}, Fps:{FPS}, Codec:{FCC}");
+
                 button_Shot.Enabled = false;
                 button_Start.Enabled = false;
                 button_Rec.Text = "停止";
@@ -158,7 +168,7 @@ namespace Control_WebCAM
             else
             {
                 RecFrg = false;
-                VW.Release();
+                //VW.Release();
                 button_Shot.Enabled = true;
                 button_Start.Enabled = true;
                 button_Rec.Text = "録画";
